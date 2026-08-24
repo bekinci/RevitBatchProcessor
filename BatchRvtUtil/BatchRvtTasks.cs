@@ -31,13 +31,6 @@ public static class BatchRvtTasks
     public enum UseRevitVersion
     {
         RevitFileVersion = 0,
-        Revit2015 = 1,
-        Revit2016 = 2,
-        Revit2017 = 3,
-        Revit2018 = 4,
-        Revit2019 = 5,
-        Revit2020 = 6,
-        Revit2021 = 7,
         Revit2022 = 8,
         Revit2023 = 9
     }

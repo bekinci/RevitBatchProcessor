@@ -27,10 +27,10 @@ def GetManagedThreadId():
     return managedThreadId
 
 def SleepForMilliseconds(milliseconds):
-    Threading.Thread.CurrentThread.Join(milliseconds)
+    Threading.Thread.CurrentThread.Join(int(milliseconds))
     return
 
 def SleepForSeconds(seconds):
-    SleepForMilliseconds(seconds * 1000)
+    SleepForMilliseconds(int(seconds) * 1000)
     return
 

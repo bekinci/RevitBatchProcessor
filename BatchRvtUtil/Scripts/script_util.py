@@ -79,5 +79,6 @@ def GetRevitFileListFilePath():
 def ExecuteScript(scriptFilePath):
     path_util.AddSearchPath(Path.GetDirectoryName(scriptFilePath))
     scriptGlobals = {}
-    execfile(scriptFilePath, scriptGlobals)
+    with open(scriptFilePath, 'r') as scriptFile:
+        exec(compile(scriptFile.read(), scriptFilePath, 'exec'), scriptGlobals)
     return

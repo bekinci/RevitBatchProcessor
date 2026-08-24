@@ -18,10 +18,12 @@
 //
 //
 
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using BatchRvt.ScriptHost.Util;
-using IronPython.Modules;
 using MSScripting = Microsoft.Scripting;
 using ScriptingHosting = Microsoft.Scripting.Hosting;
 using IronPythonHosting = IronPython.Hosting;
@@ -30,16 +32,66 @@ namespace BatchRvt.ScriptHost;
 
 public static class ScriptUtil
 {
-    private const string PYTHON_LIB_ZIP_NAME = "python_27_lib.zip";
+    private const string PYTHON_LIB_ZIP_NAME = "python_34_lib.zip";
+    private const string STD_LIB_CACHE_DIR_NAME = "PyStdLib34";
+    private const string STD_LIB_CACHE_MARKER_NAME = ".extracted";
 
     public static void AddPythonStandardLibrary(ScriptingHosting.ScriptScope scope)
     {
         var thisAssembly = typeof(ScriptUtil).Assembly;
         var pythonLibResourceName = thisAssembly.GetManifestResourceNames()
             .Single(name => name.ToLowerInvariant().EndsWith(PYTHON_LIB_ZIP_NAME.ToLowerInvariant()));
-        var importer = new ResourceMetaPathImporter(thisAssembly, pythonLibResourceName);
-        dynamic sysModule = IronPythonHosting.Python.GetSysModule(scope.Engine);
-        sysModule.meta_path.append(importer);
+
+        // The IronPython 3 engine cannot import Python 3 package submodules
+        // (e.g. encodings.utf_8) from a zip meta-path importer. Extract the
+        // embedded stdlib zip to a cached folder and put it on the engine's
+        // search paths instead, so packages import reliably.
+        var stdLibDir = GetOrExtractStdLibFolder(thisAssembly, pythonLibResourceName);
+        if (stdLibDir != null)
+        {
+            var searchPaths = scope.Engine.GetSearchPaths();
+            if (!searchPaths.Contains(stdLibDir)) searchPaths.Add(stdLibDir);
+            scope.Engine.SetSearchPaths(searchPaths);
+        }
+    }
+
+    private static string GetOrExtractStdLibFolder(System.Reflection.Assembly assembly, string resourceName)
+    {
+        try
+        {
+            var cacheDir = Path.Combine(Path.GetTempPath(), "BatchRvt", STD_LIB_CACHE_DIR_NAME);
+            var markerFile = Path.Combine(cacheDir, STD_LIB_CACHE_MARKER_NAME);
+
+            if (!File.Exists(markerFile))
+            {
+                if (Directory.Exists(cacheDir)) Directory.Delete(cacheDir, true);
+                Directory.CreateDirectory(cacheDir);
+
+                using (var stream = assembly.GetManifestResourceStream(resourceName))
+                using (var zip = new ZipArchive(stream, ZipArchiveMode.Read))
+                {
+                    foreach (var entry in zip.Entries)
+                    {
+                        if (string.IsNullOrEmpty(entry.Name)) continue;
+                        var destinationPath = Path.Combine(cacheDir, entry.FullName);
+                        Directory.CreateDirectory(Path.GetDirectoryName(destinationPath));
+                        using (var entryStream = entry.Open())
+                        using (var destinationStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write))
+                        {
+                            entryStream.CopyTo(destinationStream);
+                        }
+                    }
+                }
+
+                File.WriteAllText(markerFile, DateTime.UtcNow.ToString("O"));
+            }
+
+            return cacheDir;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static void AddVariables(ScriptingHosting.ScriptScope scope,

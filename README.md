@@ -7,6 +7,24 @@
 
 Fully automated batch processing of Revit files with your own Python or Dynamo task scripts!
 
+## Fork notice
+
+This repository is a **fork of [Revit Batch Processor](https://github.com/bvn-architecture/RevitBatchProcessor)** by Daniel Rumery / BVN, distributed under the **GPL-3.0** license (see `LICENSE.txt`). All original copyright and license notices are retained; upstream history is preserved.
+
+Changes in this fork:
+- Script host engine upgraded to **IronPython 3.4.2** with an embedded Python 3.4 standard library
+- Task-script infrastructure ported to be Python 3 compatible (kept compatible with Python 2.7 syntax)
+- Runs **pyRevit** libraries inside RBP task scripts (`from pyrevit import revit, DB, script`)
+- Support trimmed to **Revit 2022–2026** (pre-2022 addins removed)
+
+This project is not affiliated with or endorsed by the original authors.
+
+### Third-party components
+
+- **IronPython 3.4.2** and the **Dynamic Language Runtime (DLR) 1.3.5** assemblies under `References/IronPython-3.4.2/` are licensed under the **Apache License 2.0** (see the upstream IronPython and DLR projects).
+- The embedded Python 3.4 standard library (`BatchRvtScriptHost/Resources/python_34_lib.zip`) is the IronPython.StdLib distribution, licensed under the **Apache License 2.0**.
+- Running **pyRevit** libraries inside task scripts requires a local pyRevit installation (Apache-2.0); see the pyRevit project.
+
 ## Latest version (NEW)
 
 Version 1.12.1 beta release is available, which includes support for Revit 2026. [Installer is here](https://github.com/bvn-architecture/RevitBatchProcessor/releases/download/v1.12.1/RevitBatchProcessorSetup_v1.12.1.exe)
@@ -41,7 +59,7 @@ This tool doesn't _do_ any of these things, but it _allows_ you to do them:
 
 ## Features
 
-- Batch processing of Revit files (.rvt and .rfa files) using either a specific version of Revit or a version that matches the version of Revit the file was saved in. Currently supports processing files in Revit versions 2015 through 2026. (Of course the required version of Revit must be installed!)
+- Batch processing of Revit files (.rvt and .rfa files) using either a specific version of Revit or a version that matches the version of Revit the file was saved in. Currently supports processing files in Revit versions 2022 through 2026. (Of course the required version of Revit must be installed!)
 - Custom task scripts written in Python or Dynamo! Python scripts have full access to the Revit API. Dynamo scripts can of course do whatever Dynamo can do :)
 - Option to create a new Python task script at the click of a button that contains the minimal amount of code required for the custom task script to operate on an opened Revit file. The new task script can then easily be extended to do some useful work. It can even load and execute your existing functions in a C# DLL (see [Executing functions in a C# DLL](#executing-functions-in-a-c-dll)).
 - Option for custom pre- and post-processing task scripts. Useful if the overall batch processing task requires some additional setup / tear down work to be done.
@@ -70,7 +88,7 @@ The Revit Batch Processor (GUI) application will appear in the Start menu after 
 
 Open the solution file RevitBatchProcessor.sln in Visual Studio 2017 or later and run Build Solution (F6).
 
-Revit addins will be automatically deployed to the Addins folder for each available Revit version [2015-2026]. e.g. %APPDATA%\Autodesk\Revit\Addins\2019
+Revit addins will be automatically deployed to the Addins folder for each available Revit version [2022-2026]. e.g. %APPDATA%\Autodesk\Revit\Addins\2024
 
 The BatchRvtGUI project is the GUI that drives the underlying engine (the BatchRvt project). Once built, run BatchRvtGUI.exe to start the Revit Batch Processor GUI.
 
@@ -78,9 +96,9 @@ When rebuilding, please make sure all Revit applications are closed before attem
 
 # Requirements
 
-- At least one version of Revit installed. Currently supports Revit versions 2015 through 2026.
+- At least one version of Revit installed. Currently supports Revit versions 2022 through 2026.
 - To build from source code, Visual Studio version 2017 or later.
-- If executing Dynamo scripts from the task script, Dynamo 1.3+ installed (currently supports Revit versions 2016 through 2026). NOTE: The Dynamo script MUST have been saved with the 'Automatic' Run mode. There **MUST BE EXACTLY ONE VERSION OF DYNAMO INSTALLED** for each version of Revit.
+- If executing Dynamo scripts from the task script, Dynamo 1.3+ installed (currently supports Revit versions 2022 through 2026). NOTE: The Dynamo script MUST have been saved with the 'Automatic' Run mode. There **MUST BE EXACTLY ONE VERSION OF DYNAMO INSTALLED** for each version of Revit.
 - If using an Excel file for the Revit File List, Microsoft Office / Excel installed.
 
 # License
@@ -212,7 +230,7 @@ Optionally you can also specify the location for the log file:
 Alternatively, RBP can be run in batch processing mode without a settings file, using some basic arguments:
 
 ```
-%LOCALAPPDATA%\RevitBatchProcessor\BatchRvt.exe --task_script MyDynamoWorkspace.dyn --file_list RevitFileList.xlsx --revit_version 2018
+%LOCALAPPDATA%\RevitBatchProcessor\BatchRvt.exe --task_script MyDynamoWorkspace.dyn --file_list RevitFileList.xlsx --revit_version 2024
 ```
 
 NOTE: this mode will operate in Detach mode when processing Central files. The **--revit_version** argument is optional here---if it is omitted then RBP will use the version of Revit that each Revit file was saved in.
@@ -265,7 +283,7 @@ Help:
 
 		BatchRvt.exe --task_script MyTask.py --file_list RevitFileList.txt --create_new_local --worksets open_all
 
-		BatchRvt.exe --task_script MyTask.py --file_list RevitFileList.xlsx --revit_version 2019 --detach --worksets close_all
+		BatchRvt.exe --task_script MyTask.py --file_list RevitFileList.xlsx --revit_version 2025 --detach --worksets close_all
 
 ```
 

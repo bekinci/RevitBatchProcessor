@@ -250,3 +250,10 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Local experimentation / scratch (not part of the product)
+spike/
