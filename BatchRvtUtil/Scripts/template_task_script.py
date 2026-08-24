@@ -31,3 +31,12 @@ dataExportFolderPath = revit_script_util.GetDataExportFolderPath()
 Output()
 Output("This task script is running!")
 
+# Optional: make pyRevit libraries available to this task script.
+# Requires a local pyRevit installation; the task script keeps running
+# without pyRevit support if it cannot be loaded.
+try:
+    import pyrevit_bootstrap
+    from pyrevit import revit, DB, script, output
+except Exception as e:
+    Output("pyRevit not enabled: " + str(e))
+

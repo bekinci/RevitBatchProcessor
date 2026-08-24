@@ -217,6 +217,9 @@
     <Content Include="Scripts\path_util.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Scripts\pyrevit_bootstrap.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Scripts\revit_dialog_detection.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
